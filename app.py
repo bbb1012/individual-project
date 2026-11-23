@@ -7,13 +7,16 @@ import plotly.graph_objects as go
 # 设置页面宽屏
 st.set_page_config(page_title="成都二手房决策支持系统", layout="wide", page_icon="🏠")
 
+# ================= 全局变量 =================
+# 提到全局，确保估价计算器也能读取到
+district_base_price = {'锦江区': 25000, '高新区': 23000, '武侯区': 18000, '青羊区': 20000, '成华区': 17000, '郫都区': 12000}
+
 # ================= 模拟数据生成 =================
 @st.cache_data
 def load_data():
     np.random.seed(42)
     n = 500  # 模拟500套房源
-    districts = ['锦江区', '高新区', '武侯区', '青羊区', '成华区', '郫都区']
-    district_base_price = {'锦江区': 25000, '高新区': 23000, '武侯区': 18000, '青羊区': 20000, '成华区': 17000, '郫都区': 12000}
+    districts = list(district_base_price.keys())
     
     df = pd.DataFrame({
         '小区': [f"小区_{i}" for i in range(n)],
@@ -119,7 +122,7 @@ with tab3:
             
     if submit:
         # 简化的估价逻辑（模拟 XGBoost 模型）
-        base_price = district_base_price[in_district]
+        base_price = district_base_price[in_district]  # 现在这里不会报错了
         deco_factor = {'毛坯': 0.95, '简装': 1.0, '精装': 1.05}[in_deco]
         age_factor = max(0.7, 1 - in_age * 0.01)
         floor_factor = {'低楼层': 0.98, '中楼层': 1.02, '高楼层': 1.0}[in_floor]
@@ -141,4 +144,3 @@ with tab3:
             st.write(f"⚠️ **存在溢价**：该房源预估单价比该区域中位数高 **{diff_pct:.1f}%**。请仔细考量楼层或装修是否有特殊优势。")
         else:
             st.write("⚖️ **价格中规中矩**：该房源预估单价与该区域中位数基本持平。")
-
